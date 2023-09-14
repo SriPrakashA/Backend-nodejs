@@ -6,8 +6,13 @@ const {PORT,DB}=process.env;
 const mongoose = require('mongoose');
 const router = require('./router/router');
 mongoose.connect(DB,(err)=>{
-if(err) return err;
-console.log("DB connected Successfully");
+if(err) {
+    console.log(err,"Db is not connected")
+}
+else{
+    console.log("DB connected Successfully");
+}
+
 })
 // .then(()=>{
 //     console.log("DataBase connected Successfully");
@@ -22,6 +27,6 @@ app.use('/api',router);
 
 
 
-app.listen(PORT,()=>{
+app.listen(5000,()=>{
     console.log("Server is running on port:",PORT);
 })

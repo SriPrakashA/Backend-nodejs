@@ -4,7 +4,15 @@ const dataSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    email:{
+    age:{
+        type:Number,
+        required:true
+    },
+    course:{
+        type:String,
+        required:true
+    },
+    roll_num:{
         type:String,
         required:true
     },
@@ -13,4 +21,6 @@ const dataSchema = new mongoose.Schema({
         required:true
     }
 })
-module.exports=mongoose.model('Client',dataSchema);
+const MyPractice = mongoose.model('MyPractice',dataSchema,'MyPractice');
+
+module.exports = { MyPractice };

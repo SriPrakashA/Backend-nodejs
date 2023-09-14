@@ -1,13 +1,23 @@
-const dataSchema = require('../model/model');
+const { MyPractice } = require('../model/model');
 const bcrypt = require('bcrypt');
+var appData = {
+    appStatusCode: 0,
+    message: "",
+    data: [],
+    error: [],
+  };
 const createData  = async(req,res)=>{
     try {
         const hashPassword = await bcrypt.hash(req.body.password,7);
-        const userdata = new dataSchema({
+        const userdata = new MyPractice({
            ...req.body,password:hashPassword
         })
         const user = await userdata.save();
-        res.json(user);
+        appData["appStatusCode"] = 0;
+        appData["message"] = "Successfully created";
+        appData["data"] = user;
+        appData["error"] = [];
+        res.send(appData);
     } catch (error) {
         res.json(error)
     }
@@ -17,8 +27,33 @@ const createData  = async(req,res)=>{
 
 const retiveData = async(req,res)=>{
     try {
-        const retrive  = await dataSchema.find({});
-        res.json({msg:"All data Retrived",data:retrive})
+        MyPractice.aggregate([
+            // {$match:{name:"sri"}},
+            { $group:{
+                _id:"$_id",
+                name:{$first:"$name"},
+                age:{$first:"$age"},
+                marks:{$first:"$marks"},
+                roll_num:{$first:"$roll_num"}
+            } }
+        ])
+        .then((result)=>{
+            if (result) {
+                appData["appStatusCode"] = 0;
+                appData["message"] = "All students";
+                appData["data"] = result;
+                appData["error"] = [];
+                res.send(appData);
+            }
+        })
+        .catch((err)=>{
+                appData["appStatusCode"] = 4;
+                appData["message"] = "";
+                appData["data"] = [];
+                appData["error"] = `some error ${err}`;
+                res.send(appData);
+        })
+        
     } catch (error) {
         res.json({msg:"Something Wrong",data:error})
     }
@@ -68,10 +103,10 @@ const deleteAll = async(req,res)=>{
 
 const loginUser = async(req,res)=>{
    try {
-     const {email,password} = req.body;
-     const mail = await dataSchema.findOne({email:email});
-     if(!mail) return res.json({msg:"Email Not Valid"});
-     const pass = await bcrypt.compare(password,mail.password);
+     const {name,password} = req.body;
+     const myname = await MyPractice.findOne({name:name});
+     if(!myname) return res.json({msg:"name not found"});
+     const pass = await bcrypt.compare(password,myname.password);
      if(!pass) return res.json({msg:"Password Not valid"})
      res.json({msg:"Login Successfully"})
    } catch (error) {
